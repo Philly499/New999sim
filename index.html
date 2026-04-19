@@ -1,3 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>999 — Learn What To Do In An Emergency</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #f5f7ff;
+  color: #1a1a2e;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+header {
+  background: #1a1a2e;
+  color: white;
+  text-align: center;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+header .badge {
+  display: inline-block;
+  background: #e63946;
+  color: white;
+  font-weight: 900;
+  font-size: 18px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  line-height: 36px;
+  flex-shrink: 0;
+}
+header h1 { font-size: 17px; font-weight: 800; }
+header p { font-size: 13px; opacity: 0.6; font-weight: 600; margin-left: 8px; }
+
+/* ── HERO ── */
+.hero {
+  background: #e63946;
+  padding: 28px 20px 36px;
+  text-align: center;
+}
+.hero-label {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+.hero h2 {
+  color: white;
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 6px;
+  display: block;
+}
+.hero p {
+  color: rgba(255,255,255,0.85);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* ── SIMULATOR BOX ── */
+.simulator-box {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 680px;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.sim-body { padding: 16px; }
+
+.transcript {
+  background: #f5f7ff;
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.msg { padding: 8px 12px; border-radius: 10px; max-width: 85%; }
+.msg.dispatcher {
+  background: #e63946;
+  color: white;
+  align-self: flex-start;
+  border-bottom-left-radius: 3px;
+}
+.msg.dispatcher .who { font-size: 10px; opacity: 0.8; font-weight: 700; margin-bottom: 2px; }
+.msg.caller {
+  background: #e8eaf6;
+  color: #1a1a2e;
+  align-self: flex-end;
+  border-bottom-right-radius: 3px;
+}
+.msg.caller .who { font-size: 10px; color: #888; font-weight: 700; margin-bottom: 2px; }
+.msg.thinking {
+  background: transparent;
+  color: #aaa;
+  font-style: italic;
+  font-size: 12px;
+  align-self: flex-start;
+}
+
+.empty-state {
+  margin: auto;
+  text-align: center;
+  color: #aaa;
+  font-size: 13px;
+  line-height: 2;
+}
+
+.sim-controls { display: flex; gap: 10px; align-items: center; }
+
+.btn-primary {
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  flex: 1;
+}
+.btn-primary:hover { background: #c1121f; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary.grey { background: #6c757d; }
+
+.btn-mic {
+  background: #e8eaf6;
+  border: 2px solid #c5cae9;
+  border-radius: 10px;
+  padding: 13px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-mic:hover { border-color: #3949ab; color: #3949ab; }
+.btn-mic.active { background: #e63946; color: white; border-color: #e63946; }
+
+.call-status {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 8px;
+  min-height: 20px;
+}
+.call-status.live { color: #2d6a4f; }
+.call-status.error { color: #e63946; }
+
+/* ── WARNING ── */
+.warning {
+  background: #fff3cd;
+  border-bottom: 3px solid #ffc107;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #856404;
+}
+
+/* ── MAIN ── */
+main {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 28px 16px 48px;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 14px;
+  color: #1a1a2e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── CARDS ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  border: 2px solid #e8eaf6;
+  text-align: center;
+}
+.card .icon { font-size: 32px; margin-bottom: 8px; }
+.card h3 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+.card p { font-size: 13px; color: #555; }
+
+/* ── STEPS ── */
+.steps { margin-bottom: 32px; }
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: white;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 2px solid #e8eaf6;
+}
+.step-num {
+  background: #e63946;
+  color: white;
+  font-weight: 900;
+  font-size: 16px;
+  min-width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step-text h3 { font-size: 15px; font-weight: 800; margin-bottom: 2px; }
+.step-text p { font-size: 13px; color: #555; }
+
+/* ── DID YOU KNOW ── */
+.did-you-know {
+  background: #e8f4fd;
+  border: 2px solid #b3d7f5;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 32px;
+}
+.did-you-know h2 { color: #1565c0; }
+.did-you-know ul { padding-left: 20px; }
+.did-you-know li { font-size: 13px; color: #1565c0; margin-bottom: 6px; font-weight: 600; }
+
+/* ── LINKS ── */
+.links { margin-bottom: 32px; }
+.link-list { display: flex; flex-direction: column; gap: 10px; }
+.link-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 2px solid #e8eaf6;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+.link-item:hover { border-color: #3949ab; }
+.link-item .link-icon { font-size: 24px; flex-shrink: 0; }
+.link-item .link-text .title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
+.link-item .link-text .desc { font-size: 12px; color: #666; }
+.link-item .arrow { margin-left: auto; color: #aaa; font-size: 18px; }
+
+/* ── FOOTER ── */
+footer {
+  background: #1a1a2e;
+  color: #aaa;
+  text-align: center;
+  padding: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 2;
+}
+footer strong { color: #e63946; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">999</div>
+  <h1>Learn What To Do In An Emergency</h1>
+  <p>An educational tool for young people in the UK 🇬🇧</p>
+</header>
+
+<div class="hero">
+  <div class="hero-label">🎓 Educational Simulation — UK Schools</div>
+  <h2>📞 Practise Calling 999</h2>
+  <p>Speak to a realistic AI dispatcher and learn what to do in an emergency</p>
+  <div class="simulator-box">
+    <div class="sim-body">
+      <div class="call-status" id="callStatus">Press the button below to begin your practice call</div>
+      <div class="transcript" id="transcript">
+        <div class="empty-state" id="emptyState">
+          🗣️ Your conversation will appear here<br>
+          <span style="font-size:12px">Uses your microphone — best on Google Chrome</span>
+        </div>
+      </div>
+      <div class="sim-controls">
+        <button class="btn-primary" id="mainBtn" onclick="handleMain()">📞 Start 999 Call</button>
+        <button class="btn-mic" id="micBtn" onclick="startListening()" style="display:none">🎤 Speak</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="warning">
+  ⚠️ This is an educational simulation only. In a real emergency, call <strong>999</strong> immediately.
+</div>
+
+<main>
+
+  <section style="margin-bottom:32px">
+    <h2>🚨 When should you call 999?</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="icon">🚑</div>
+        <h3>Ambulance</h3>
+        <p>Someone is seriously injured, unconscious, or having a medical emergency</p>
+      </div>
+      <div class="card">
+        <div class="icon">🚒</div>
+        <h3>Fire Brigade</h3>
+        <p>There is a fire, or someone is trapped in a dangerous situation</p>
+      </div>
+      <div class="card">
+        <div class="icon">🚔</div>
+        <h3>Police</h3>
+        <p>A crime is happening, someone is in danger, or you feel unsafe</p>
+      </div>
+    </div>
+    <div class="card" style="text-align:left; margin-top:12px;">
+      <p>⚠️ <strong>Not an emergency?</strong> Use <strong>111</strong> for medical advice, or <strong>101</strong> for non-urgent police matters. Calling 999 when it's not needed can slow down help for people who really need it.</p>
+    </div>
+  </section>
+
+  <section class="steps">
+    <h2>📋 What happens when you call 999?</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <h3>You'll hear: "Emergency, which service do you require?"</h3>
+        <p>Say "Police", "Fire", or "Ambulance" clearly.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <h3>They'll ask where you are</h3>
+        <p>Try to give your full address, postcode, or describe nearby landmarks.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <h3>Explain what is happening</h3>
+        <p>Stay calm and answer their questions clearly and honestly.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">
+        <h3>Stay on the line</h3>
+        <p>Don't hang up unless told to. The operator may give you important instructions while help is on the way.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="did-you-know">
+    <h2>💡 Did you know?</h2>
+    <ul>
+      <li>You can call 999 even if you have no signal — your phone will try every network available.</li>
+      <li>If you can't speak, stay on the line and press 55 when prompted — this alerts police.</li>
+      <li>You can text 999 if you are deaf, hard of hearing, or cannot speak — but you must register first at <strong>emergencysms.net</strong></li>
+      <li>999 calls are free — even with no credit or from a locked phone.</li>
+      <li>The average response time for a life-threatening 999 call is around 7 minutes.</li>
+    </ul>
+  </section>
+
+  <section class="links">
+    <h2>🔗 Learn More</h2>
+    <div class="link-list">
+      <a class="link-item" href="https://www.nhs.uk/nhs-services/urgent-and-emergency-care-services/when-to-call-999/" target="_blank" rel="noopener">
+        <span class="link-icon">🏥</span>
+        <div class="link-text">
+          <div class="title">NHS — When to call 999</div>
+          <div class="desc">Official NHS guide on when to call 999 vs 111</div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+      <a class="link-item" href="https://www.redcross.org.uk/first-aid/learn-first-aid-for-children" target="_blank" rel="noopener">
+        <span class="link-icon">🩹</span>
+        <div class="link-text">
+          <div class="title">British Red Cross — First Aid for Children</div>
+          <div class="desc">Simple first aid guides written for young people</div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+      <a class="link-item" href="https://www.emergencysms.net/" target="_blank" rel="noopener">
+        <span class="link-icon">💬</span>
+        <div class="link-text">
+          <div class="title">Emergency SMS — Text 999</div>
+          <div class="desc">How to register to text 999 if you cannot speak</div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+      <a class="link-item" href="https://www.childline.org.uk/info-advice/your-feelings/feelings-emotions/feeling-scared-unsafe/" target="_blank" rel="noopener">
+        <span class="link-icon">💚</span>
+        <div class="link-text">
+          <div class="title">Childline — Feeling Scared or Unsafe</div>
+          <div class="desc">Advice for young people who feel unsafe or in danger</div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+      <a class="link-item" href="https://www.stjohn.org.uk/first-aid-advice/" target="_blank" rel="noopener">
+        <span class="link-icon">⛑️</span>
+        <div class="link-text">
+          <div class="title">St John Ambulance — First Aid Advice</div>
+          <div class="desc">Step-by-step first aid guidance from trusted experts</div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <strong>SIMULATION ONLY</strong> — This tool is for educational purposes.<br>
+  In a real emergency, always call <strong>999</strong>.<br>
+  Built for UK schools and young people.
+</footer>
+
 <script>
 let inCall = false, history = [], isAISpeaking = false, isListening = false, recognition = null, hasResult = false;
 
@@ -35,6 +485,138 @@ function addThinking() {
 function handleMain() {
   inCall ? endCall() : startCall();
 }
+
+function startCall() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    setStatus('⚠️ Please use Google Chrome for voice support.', 'error');
+    return;
+  }
+  inCall = true;
+  history = [];
+  const btn = document.getElementById('mainBtn');
+  btn.textContent = '📵 End Call';
+  btn.className = 'btn-primary grey';
+  document.getElementById('micBtn').style.display = 'block';
+  setStatus('Connecting…');
+
+  setTimeout(() => {
+    if (!inCall) return;
+    setStatus('🟢 Connected to 999', 'live');
+    const opener = "Emergency, which service do you require?";
+    history.push({ role: 'assistant', content: opener });
+    addMsg('dispatcher', opener);
+    speak(opener);
+  }, 1200);
+}
+
+function endCall() {
+  inCall = false;
+  if (recognition) { try { recognition.abort(); } catch(e){} }
+  if (isAISpeaking) window.speechSynthesis.cancel();
+  isListening = false;
+  isAISpeaking = false;
+  hasResult = false;
+  setStatus('Call ended. Press Start to try again.');
+  const btn = document.getElementById('mainBtn');
+  btn.textContent = '📞 Start 999 Call';
+  btn.className = 'btn-primary';
+  document.getElementById('micBtn').style.display = 'none';
+  document.getElementById('micBtn').className = 'btn-mic';
+  document.getElementById('micBtn').textContent = '🎤 Speak';
+}
+
+function startListening() {
+  if (!inCall || isAISpeaking || isListening) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-GB';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  hasResult = false;
+  isListening = true;
+  const mic = document.getElementById('micBtn');
+  mic.textContent = '🔴 Listening…';
+  mic.classList.add('active');
+
+  recognition.onresult = e => {
+    if (hasResult) return;
+    hasResult = true;
+    recognition.abort();
+    const text = e.results[0][0].transcript.trim();
+    if (text) handleSpeech(text);
+  };
+
+  recognition.onerror = e => {
+    isListening = false;
+    hasResult = false;
+    mic.textContent = '🎤 Speak';
+    mic.classList.remove('active');
+    if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      setStatus('Mic error: ' + e.error + '. Check browser permissions.', 'error');
+    }
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    mic.textContent = '🎤 Speak';
+    mic.classList.remove('active');
+  };
+
+  recognition.start();
+}
+
+async function handleSpeech(text) {
+  addMsg('caller', text);
+  history.push({ role: 'user', content: text });
+  addThinking();
+  setStatus('Dispatcher is responding…');
+  try {
+    const res = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history }),
+    });
+    const data = await res.json();
+    document.getElementById('thinking')?.remove();
+    if (!res.ok) {
+      setStatus('Something went wrong. Please try again.', 'error');
+      return;
+    }
+    const reply = data.content[0].text;
+    history.push({ role: 'assistant', content: reply });
+    addMsg('dispatcher', reply);
+    speak(reply);
+    setStatus('🟢 Connected to 999', 'live');
+  } catch {
+    document.getElementById('thinking')?.remove();
+    setStatus('Network error. Check your connection.', 'error');
+  }
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  isAISpeaking = true;
+  const u = new SpeechSynthesisUtterance(text);
+  const trySpeak = () => {
+    const voices = window.speechSynthesis.getVoices();
+    const v = voices.find(v => v.name === 'Daniel')
+      || voices.find(v => v.lang === 'en-GB')
+      || voices[0];
+    if (v) u.voice = v;
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.onend = () => { isAISpeaking = false; };
+    u.onerror = () => { isAISpeaking = false; };
+    window.speechSynthesis.speak(u);
+  };
+  window.speechSynthesis.getVoices().length ? trySpeak() : (window.speechSynthesis.onvoiceschanged = trySpeak);
+}
+
+if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+</script>
+</body>
+</html>}
 
 function startCall() {
   if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
