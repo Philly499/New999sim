@@ -1,40 +1,170 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>999 — Learn What To Do In An Emergency</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<script>
+let inCall = false, history = [], isAISpeaking = false, isListening = false, recognition = null, hasResult = false;
 
-body {
-  font-family: 'Nunito', sans-serif;
-  background: #f5f7ff;
-  color: #1a1a2e;
-  line-height: 1.6;
+function setStatus(msg, cls) {
+  const el = document.getElementById('callStatus');
+  el.textContent = msg;
+  el.className = 'call-status' + (cls ? ' ' + cls : '');
 }
 
-/* ── HEADER ── */
-header {
-  background: #1a1a2e;
-  color: white;
-  text-align: center;
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+function addMsg(role, text) {
+  document.getElementById('emptyState')?.remove();
+  const t = document.getElementById('transcript');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const who = document.createElement('div');
+  who.className = 'who';
+  who.textContent = role === 'dispatcher' ? '📞 999 Dispatcher' : '🧒 You';
+  div.appendChild(who);
+  div.appendChild(document.createTextNode(text));
+  t.appendChild(div);
+  t.scrollTop = t.scrollHeight;
 }
-header .badge {
-  display: inline-block;
-  background: #e63946;
-  color: white;
-  font-weight: 900;
-  font-size: 18px;
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  line-height: 36px;
+
+function addThinking() {
+  document.getElementById('emptyState')?.remove();
+  const t = document.getElementById('transcript');
+  const div = document.createElement('div');
+  div.className = 'msg thinking';
+  div.id = 'thinking';
+  div.textContent = 'Dispatcher is responding…';
+  t.appendChild(div);
+  t.scrollTop = t.scrollHeight;
+}
+
+function handleMain() {
+  inCall ? endCall() : startCall();
+}
+
+function startCall() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    setStatus('⚠️ Please use Google Chrome for voice support.', 'error');
+    return;
+  }
+  inCall = true;
+  history = [];
+  const btn = document.getElementById('mainBtn');
+  btn.textContent = '📵 End Call';
+  btn.className = 'btn-primary grey';
+  document.getElementById('micBtn').style.display = 'block';
+  setStatus('Connecting…');
+
+  setTimeout(() => {
+    if (!inCall) return;
+    setStatus('🟢 Connected to 999', 'live');
+    const opener = "Emergency, which service do you require?";
+    history.push({ role: 'assistant', content: opener });
+    addMsg('dispatcher', opener);
+    speak(opener);
+  }, 1200);
+}
+
+function endCall() {
+  inCall = false;
+  if (recognition) { try { recognition.abort(); } catch(e){} }
+  if (isAISpeaking) window.speechSynthesis.cancel();
+  isListening = false;
+  isAISpeaking = false;
+  hasResult = false;
+  setStatus('Call ended. Press Start to try again.');
+  const btn = document.getElementById('mainBtn');
+  btn.textContent = '📞 Start 999 Call';
+  btn.className = 'btn-primary';
+  document.getElementById('micBtn').style.display = 'none';
+  document.getElementById('micBtn').className = 'btn-mic';
+  document.getElementById('micBtn').textContent = '🎤 Speak';
+}
+
+function startListening() {
+  if (!inCall || isAISpeaking || isListening) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-GB';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  hasResult = false;
+  isListening = true;
+  const mic = document.getElementById('micBtn');
+  mic.textContent = '🔴 Listening…';
+  mic.classList.add('active');
+
+  recognition.onresult = e => {
+    if (hasResult) return;
+    hasResult = true;
+    recognition.abort();
+    const text = e.results[0][0].transcript.trim();
+    if (text) handleSpeech(text);
+  };
+
+  recognition.onerror = e => {
+    isListening = false;
+    hasResult = false;
+    mic.textContent = '🎤 Speak';
+    mic.classList.remove('active');
+    if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      setStatus('Mic error: ' + e.error + '. Check browser permissions.', 'error');
+    }
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    mic.textContent = '🎤 Speak';
+    mic.classList.remove('active');
+  };
+
+  recognition.start();
+}
+
+async function handleSpeech(text) {
+  addMsg('caller', text);
+  history.push({ role: 'user', content: text });
+  addThinking();
+  setStatus('Dispatcher is responding…');
+  try {
+    const res = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history }),
+    });
+    const data = await res.json();
+    document.getElementById('thinking')?.remove();
+    if (!res.ok) {
+      setStatus('Something went wrong. Please try again.', 'error');
+      return;
+    }
+    const reply = data.content[0].text;
+    history.push({ role: 'assistant', content: reply });
+    addMsg('dispatcher', reply);
+    speak(reply);
+    setStatus('🟢 Connected to 999', 'live');
+  } catch {
+    document.getElementById('thinking')?.remove();
+    setStatus('Network error. Check your connection.', 'error');
+  }
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  isAISpeaking = true;
+  const u = new SpeechSynthesisUtterance(text);
+  const trySpeak = () => {
+    const voices = window.speechSynthesis.getVoices();
+    const v = voices.find(v => v.name === 'Daniel')
+      || voices.find(v => v.lang === 'en-GB')
+      || voices[0];
+    if (v) u.voice = v;
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.onend = () => { isAISpeaking = false; };
+    u.onerror = () => { isAISpeaking = false; };
+    window.speechSynthesis.speak(u);
+  };
+  window.speechSynthesis.getVoices().length ? trySpeak() : (window.speechSynthesis.onvoiceschanged = trySpeak);
+}
+
+if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+</script>  line-height: 36px;
   flex-shrink: 0;
 }
 header h1 { font-size: 17px; font-weight: 800; }
