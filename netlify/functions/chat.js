@@ -3,7 +3,7 @@ exports.handler = async function (event) {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = "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";
   if (!apiKey) {
     console.log("ERROR: No API key found in environment variables");
     return { statusCode: 500, body: JSON.stringify({ error: "API key not configured" }) };
