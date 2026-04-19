@@ -5,11 +5,15 @@ exports.handler = async function (event) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
+    console.log("ERROR: No API key found in environment variables");
     return { statusCode: 500, body: JSON.stringify({ error: "API key not configured" }) };
   }
 
+  console.log("API key found, length:", apiKey.length);
+
   try {
     const body = JSON.parse(event.body);
+    console.log("Calling Anthropic with", body.messages.length, "messages");
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -19,7 +23,7 @@ exports.handler = async function (event) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 250,
         system: `You are a UK 999 emergency call handler in an educational simulation for children and young people. Stay fully in character at all times.
 
@@ -38,12 +42,16 @@ Rules:
     });
 
     const data = await response.json();
+    console.log("Anthropic status:", response.status);
+    console.log("Anthropic response:", JSON.stringify(data).substring(0, 200));
+
     return {
       statusCode: response.status,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     };
   } catch (err) {
+    console.log("CAUGHT ERROR:", err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Server error: " + err.message }),
