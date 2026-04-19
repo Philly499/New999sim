@@ -4,6 +4,8 @@ exports.handler = async function (event) {
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
+  console.log("Key starts with:", apiKey.substring(0, 20));
+console.log("Key length:", apiKey.length);
 
   try {
     const body = JSON.parse(event.body);
